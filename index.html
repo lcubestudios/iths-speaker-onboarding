@@ -583,36 +583,17 @@
   }
  
   /* Active sidebar on scroll */
-const navLinks = document.querySelectorAll('.sidebar-nav a');
-const sections = Array.from(document.querySelectorAll('[id]'));
-
-function updateActive() {
-  const scrollY = window.scrollY;
-  const windowH = window.innerHeight;
-  const docH = document.documentElement.scrollHeight;
-
-  // If near the bottom of the page, force the last nav item active
-  if (scrollY + windowH >= docH - 40) {
-    navLinks.forEach(a => a.classList.remove('active'));
-    const lastLink = navLinks[navLinks.length - 1];
-    if (lastLink) lastLink.classList.add('active');
-    return;
-  }
-
-  let current = sections[0].id;
-  sections.forEach(s => {
-    if (s.getBoundingClientRect().top < windowH * 0.35) {
-      current = s.id;
-    }
-  });
-
-  navLinks.forEach(a => {
-    a.classList.toggle('active', a.getAttribute('href') === '#' + current);
-  });
-}
-
-window.addEventListener('scroll', updateActive, { passive: true });
-updateActive();
+  const navLinks = document.querySelectorAll('.sidebar-nav a');
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        navLinks.forEach(a => a.classList.remove('active'));
+        const lnk = document.querySelector(`.sidebar-nav a[href="#${e.target.id}"]`);
+        if (lnk) lnk.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  document.querySelectorAll('[id]').forEach(s => obs.observe(s));
  
   /* Scroll fade-in */
   const fadeObs = new IntersectionObserver((entries) => {
