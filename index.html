@@ -584,22 +584,22 @@
  
   /* Active sidebar on scroll */
   const navLinks = document.querySelectorAll('.sidebar-nav a');
-  const obs = new IntersectionObserver((entries) => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        navLinks.forEach(a => a.classList.remove('active'));
-        const lnk = document.querySelector(`.sidebar-nav a[href="#${e.target.id}"]`);
-        if (lnk) lnk.classList.add('active');
-      }
+  const navSections = Array.from(document.querySelectorAll('[id]')).filter(s =>
+    document.querySelector(`.sidebar-nav a[href="#${s.id}"]`)
+  );
+  
+  function updateNav() {
+    let current = navSections[0];
+    navSections.forEach(s => {
+      if (s.getBoundingClientRect().top <= window.innerHeight * 0.35) current = s;
     });
-  }, { rootMargin: '-20% 0px -20% 0px' });
-  document.querySelectorAll('[id]').forEach(s => obs.observe(s));
-  window.addEventListener('scroll', () => {
-    if (window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 10) {
-      navLinks.forEach(a => a.classList.remove('active'));
-      navLinks[navLinks.length - 1].classList.add('active');
-    }
-  }, { passive: true });
+    navLinks.forEach(a => {
+      a.classList.toggle('active', a.getAttribute('href') === '#' + current.id);
+    });
+  }
+  
+  window.addEventListener('scroll', updateNav, { passive: true });
+  updateNav();
  
   /* Scroll fade-in */
   const fadeObs = new IntersectionObserver((entries) => {
